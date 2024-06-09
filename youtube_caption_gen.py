@@ -1,6 +1,6 @@
 from langchain_community.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
 from langchain_community.document_loaders.generic import GenericLoader
-from langchain_community.document_loaders.parsers.audio import OpenAIWhisperParser
+from langchain_community.document_loaders.parsers.audio import OpenAIWhisperParser, FasterWhisperParser
 from typing import List
 from dotenv import load_dotenv
 
@@ -27,8 +27,10 @@ def set_proxy():
 def main(youtube_urls:List[str], save_folder:str):
     set_proxy()
     audio_loader = gen_audio_loader(youtube_urls, save_folder)
-    audio_docs = parse(audio_loader, blob_parser=OpenAIWhisperParser())
-    write_audio_docs(audio_docs, save_folder)
+    import torch
+    blob_parser = FasterWhisperParser() if torch.cuda.is_available() else OpenAIWhisperParser()
+    audio_docs = parse(audio_loader, blob_parser=blob_parser)
+    write_audio_docs(audio_docs)
     print(f"Saved {len(audio_docs)} audio docs to {save_folder}")
 
 if __name__ == "__main__":
