@@ -68,7 +68,12 @@ def get_beautify_llm(free:bool=False):
 
 def beautify_audio_doc(audio_doc:str, chain_name:str="Youtube Caption Beautify"):
     prompt, output_parser = get_beautify_prompt()
-    llm = get_beautify_llm(free=True)
+    FREE_LLM = os.environ.get('FREE_LLM', None)
+    if FREE_LLM is not None and FREE_LLM.lower() == 'true':
+        free = True
+    else:
+        free = False
+    llm = get_beautify_llm(free=free)
     def additional_processing(x: Any):
         x.content = x.content.replace('"""\n', '"')
         x.content = x.content.replace('"""', '"')
@@ -91,6 +96,7 @@ def beautify_audio_docs(audio_docs:List[str]):
 def main(youtube_urls:List[str], save_folder:str):
     load_dotenv()
     os.environ['LANGCHAIN_PROJECT'] = 'Youtube Caption Generation'
+    os.environ['FREE_LLM'] = 'True'
     set_proxy()
     audio_loader = gen_audio_loader(youtube_urls, save_folder)
     blob_parser = gen_blob_parser()
