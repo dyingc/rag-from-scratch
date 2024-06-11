@@ -87,9 +87,20 @@ def write_audio_docs(audio_docs:List[str]):
 
 def set_proxy():
     import os
-    os.environ['http_proxy'] = ''
-    os.environ['https_proxy'] = ''
-    os.environ['no_proxy'] = ''
+    
+    # a function to test the connectivity to the proxy
+    def get_proxy():
+        ora_proxy = 'http://www-proxy-ash7.us.oracle.com:80'
+        import requests
+        try:
+            requests.get(ora_proxy, timeout=1)
+            return ora_proxy
+        except Exception as e:
+            return ""
+    proxy = get_proxy()
+    os.environ['http_proxy'] = proxy
+    os.environ['https_proxy'] = proxy
+    os.environ['no_proxy'] = proxy
 
 def get_beautify_llm(free:str='False'):
     if free is not None and free.lower() == "true":

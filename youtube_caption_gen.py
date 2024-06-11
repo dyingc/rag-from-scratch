@@ -29,9 +29,20 @@ def write_audio_docs(audio_docs:List[str]):
 
 def set_proxy():
     import os
-    os.environ['http_proxy'] = ''
-    os.environ['https_proxy'] = ''
-    os.environ['no_proxy'] = ''
+    
+    # a function to test the connectivity to the proxy
+    def get_proxy():
+        ora_proxy = 'http://www-proxy-ash7.us.oracle.com:80'
+        import requests
+        try:
+            requests.get(ora_proxy, timeout=1)
+            return ora_proxy
+        except Exception as e:
+            return ""
+    proxy = get_proxy()
+    os.environ['http_proxy'] = proxy
+    os.environ['https_proxy'] = proxy
+    os.environ['no_proxy'] = proxy
 
 def get_beautify_prompt():
     system = """You are an excellent editor. Your task is to review and edit a text transcribed from an audio clip. Your duties include:
@@ -48,7 +59,7 @@ def get_beautify_prompt():
     human = """Audio Transcript:\n{audio_doc}"""
     text_schema = ResponseSchema(name="refined_text", type="string", description="The refined text - Note: you should not change or translate the original language. So English in, English out; French in, French out")
     language_schema = ResponseSchema(name="language", type="string", description="The detected language of the text")
-    schemas = [text_schema, language_schema]
+    schemas = [language_schema, text_schema]
     output_parser = StructuredOutputParser(name="refined_text_output_parser", response_schemas=schemas)
     template = f"""{system}\n\n{human}"""
     prompt = PromptTemplate.from_template(template)
@@ -110,6 +121,6 @@ def main(youtube_urls:List[str], save_folder:str):
     print(f"Saved {len(audio_docs)} audio docs to {save_folder}")
 
 if __name__ == "__main__":
-    youtube_urls = ["https://www.youtube.com/watch?v=kl6NwWYxvbM&list=PLfaIDFEXuae2LXbO1_PKyVJiQ23ZztA0x&index=11"]
+    youtube_urls = ["https://www.youtube.com/watch?v=8OJC21T2SL4"]
     save_folder = "/tmp/yt_audios"
     main(youtube_urls, save_folder)
