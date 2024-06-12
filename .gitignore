@@ -162,3 +162,6 @@ cython_debug/
 langchain
 tutorials
 .vscode
+.*.swp
+
+data/data_store
