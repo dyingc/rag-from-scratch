@@ -71,14 +71,14 @@ def create_multi_vectore_retriever(name:str, docs:List[Document],
                                    id_key:str=doc_id_name, 
                                    num_to_store:int=None)->MultiVectorRetriever:
     summary_vec_store = Chroma(collection_name="summary",
-                          embedding_function=OpenAIEmbeddings(),
+                          embedding_function=OpenAIEmbeddings(model="text-embedding-3-small", dimensions=1536),
                           persist_directory="data/data_store/indexing/summaries")
     doc_store = InMemoryStore()
     retriver = MultiVectorRetriever(name=name,
                          vectorstore=summary_vec_store,
                          docstore=doc_store,
                          byte_store=LocalFileStore(root_path="data/data_store/indexing/docs"),
-                         id_key=id_key, k=5)
+                         id_key=id_key, k=3)
     doc_id_list = [doc.metadata.get(doc_id_name) for doc in docs[:num_to_store]]
     retriver.vectorstore.add_documents(summaries)
     retriver.docstore.mset(list(zip(doc_id_list, docs[:num_to_store]))) # Setting "docstore" will automatically add files in "byte_store" location
@@ -103,7 +103,7 @@ def get_rag_chain(retriever:MultiVectorRetriever)->Chain:
 
 def main():
     set_env()
-    limit_to = 1
+    limit_to = 5
     docs = download_docs("data/document_list.json", num_to_download=limit_to)
     summaries = summarize_docs(docs, limit_to)
     multi_vect_retriever = create_multi_vectore_retriever(name="Multi Vector Retriever", 
